@@ -276,14 +276,43 @@
     </footer>
 
     <script>
+        const SUPABASE_URL = 'https://wutwdxmdufqobkjpkoxr.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1dHdkeG1kdWZxb2JranBrb3hyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA0ODM5MzMsImV4cCI6MjA4NjA1OTkzM30.H1rjHl8CTeWHbpQfF7oHYPw5EGpn69E_kNtRSAvGP-4';
+        
         document.getElementById('emailOrderForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
             
-            // For now, just show confirmation - will connect to Supabase
-            alert('Thank you! Your order request has been received. I\\'ll be in touch within 24 hours with a payment link.');
-            this.reset();
+            const button = this.querySelector('button[type="submit"]');
+            button.textContent = 'Submitting...';
+            button.disabled = true;
+            
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/email_orders`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    alert('Thank you! Your order request has been received. I\\'ll be in touch within 24 hours with a payment link.');
+                    this.reset();
+                } else {
+                    throw new Error('Submission failed');
+                }
+            } catch (err) {
+                alert('Something went wrong. Please try again or email directly.');
+                console.error(err);
+            } finally {
+                button.textContent = 'Submit Order Request';
+                button.disabled = false;
+            }
         });
     </script>
 </body>
